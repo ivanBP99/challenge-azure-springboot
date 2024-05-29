@@ -20,6 +20,11 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file app/pom.xml
     - name: Extract version from pom.xml
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
       id: extract-version
       run: |
         $project_version=mvn help:evaluate -Dexpression=project.version -q -DforceStdout; echo "project_version=$project_version" >> $Env:GITHUB_ENV
