@@ -22,7 +22,7 @@ jobs:
     - name: Extract version from pom.xml
       id: extract-version
       run: |
-        echo "::set-output name=version::$(xmllint --xpath 'string(//project/version)' app/pom.xml)"
+        $project_version=mvn help:evaluate -Dexpression=project.version -q -DforceStdout; echo "project_version=$project_version" >> $Env:GITHUB_ENV
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -37,7 +37,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: hansel
-        IMAGE_TAG: ${{ steps.extract-version.outputs.version }}
+        IMAGE_TAG: ${{ env.project_version }}
       run: |
         cd ./app
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
