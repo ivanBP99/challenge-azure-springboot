@@ -21,7 +21,7 @@ jobs:
       id: extract-version
       run: |
         mvn -B package --file app/pom.xml
-        $project_version=mvn help:evaluate -Dexpression=project.version -q -DforceStdout; echo "project_version=$project_version" >> $Env:GITHUB_ENV
+        $project_version = mvn help:evaluate -Dexpression=project.version -q -DforceStdout; echo "project_version=$project_version" >> $Env:GITHUB_ENV
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
