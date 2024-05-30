@@ -192,8 +192,8 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
         image: "public.ecr.aws/f9n5f1l7/dgs:latest",
         portMappings: [
           {
-            containerPort: 8080,
-            hostPort: 8080,
+            containerPort: 80,
+            hostPort: 80,
             protocol: "tcp"
           }
         ]
