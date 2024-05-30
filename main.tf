@@ -95,7 +95,7 @@ resource "aws_route_table_association" "subnet2_route" {
   route_table_id = aws_route_table.route_table.id
 }
 
-resource "aws_security_group" "security_group" {
+resource "aws_security_group" "lb_sg" {
   name = "ecs-security-group"
   vpc_id = aws_vpc.main.id
 
@@ -121,7 +121,7 @@ resource "aws_lb" "ecs_alb" {
   name               = "ecs-alb"
   internal           = false
   load_balancer_type = "application"
-  security_group     = [aws_security_group.security_group.id]
+  security_group     = [aws_security_group.lb_sg.id]
   subnets            = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
   tags               = {
     environment = "alb-dev"
@@ -217,7 +217,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   network_configuration {
     subnets         = [ aws_subnet.subnet.id, aws_subnet.subnet2.id ]
-    security_groups = [aws_security_group.security_group.id]
+    security_groups = [aws_security_group.lb_sg.id]
     //assign_public_ip = true
   }
 }
