@@ -29,6 +29,12 @@ variable "image_tag" {
   type = string
   default = "0.0.1-SNAPSHOT"
 }
+
+variable "vpc_cidr" {
+  description = "CIDR block for main"
+  type = String
+  default = "10.0.0.0/16"
+}
 #############################################################################
 # PROVIDERS
 #############################################################################
@@ -68,14 +74,14 @@ resource "aws_subnet" "subnet" {
   vpc_id = aws_vpc.main.id
   cidr_block = "cidrsubnet(aws_vpc.main.cidr_block,8,1)"
   map_public_ip_on_launch = true
-  availability_zone = "eu-central-1a"
+  availability_zone = "us-east-2a"
 }
 
 resource "aws_subnet" "subnet2" {
   vpc_id = aws_vpc.main.id
   cidr_block = "cidrsubnet(aws_vpc.main.cidr_block,8,2)"
   map_public_ip_on_launch = true
-  availability_zone = "eu-central-1b"
+  availability_zone = "us-east-2b"
 }
 
 resource "aws_ecs_cluster" "this" {
