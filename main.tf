@@ -63,7 +63,6 @@ resource "aws_ecs_cluster" "this" {
 resource "aws_ecs_task_definition" "this" {
   family = "app-task"
   container_definitions = jsonencode([
-    [
       {
         "name": "app",
         "imageUri": "public.ecr.aws/f9n5f1l7/dgs:latest",
@@ -74,7 +73,7 @@ resource "aws_ecs_task_definition" "this" {
           }
         ]
       }
-    ]])
+    ])
   requires_compatibilities = ["FARGATE"]
   network_mode = "awsvpc"
   cpu          = "256"
