@@ -157,10 +157,6 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   requires_compatibilities = ["FARGATE"]
 }
 
-resource "aws_ecr_repository" "ecr_repository" {
-  name = "hansel"
-}
-
 resource "aws_ecs_service" "this" {
   name            = "ecs-service"
   cluster         = aws_ecs_cluster.this.id
