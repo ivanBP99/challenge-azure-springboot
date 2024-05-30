@@ -100,24 +100,81 @@ resource "aws_security_group" "security_group" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port = 0
-    protocol = -1
-    to_port = 0
+    from_port   = 0
+    protocol    = -1
+    to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
     description = "any"
   }
   egress {
-    from_port = 0
-    protocol = -1
-    to_port = 0
+    from_port   = 0
+    protocol    = -1
+    to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
     description = "any"
   }
 }
 
+//abl
+
+resource "aws_lb" "ecs_alb" {
+  name               = "ecs-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_group     = [aws_security_group.security_group.id]
+  subnets            = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
+  tags               = {
+    environment = "alb-dev"
+  }
+}
+
+resource "aws_lb_listener" "ecs_listener" {
+  load_balancer_arn  = aws_lb.ecs_alb.arn
+  port               = 80
+  protocol           = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = "aws_lb_target_group"
+  }
+}
+
+resource "aws_lb_target_group" "ecs_tg" {
+  name        = "lb_target_group"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    path = "/"
+  }
+}
+
+//cluster
+
 resource "aws_ecs_cluster" "this" {
   name = "app-cluster-challenge"
 }
+
+//auto-scaling
+
+#resource "aws_autoscaling_group" "autoscaling_group" {
+#  vpc_zone_identifier = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
+#  desired_capacity = 2
+#  max_size = 3
+#  min_size = 1
+
+#  launch_template {
+#    id = aws_launch
+#  }
+#}
+
+#resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
+#  name = "test1"
+#  auto_scaling_group_provider {
+#    auto_scaling_group_arn = ""
+#  }
+#}
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   family       = "app-task"
@@ -148,9 +205,15 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 resource "aws_ecs_service" "ecs_service" {
   name            = "ecs-service"
   cluster         = aws_ecs_cluster.this.id
-  task_definition  = aws_ecs_task_definition.ecs_task_definition.arn
+  task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    container_name   = "container-app"
+    container_port   = 80
+  }
 
   network_configuration {
     subnets          = [ aws_subnet.subnet.id, aws_subnet.subnet2.id ]
@@ -158,3 +221,11 @@ resource "aws_ecs_service" "ecs_service" {
     //assign_public_ip = true
   }
 }
+
+#############################################################################
+# OUTPUT
+#############################################################################
+
+#output "" {
+#  value = ""
+#}
