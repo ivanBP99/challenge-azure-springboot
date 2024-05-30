@@ -62,7 +62,6 @@ provider "aws" {
 #############################################################################
 
 resource "aws_vpc" "main" {
-  name = "vpc-ecr-two-subnet"
   cidr_block = var.vpc_cidr
   enable_dns_hostnames = true
   tags = {
