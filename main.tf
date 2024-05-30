@@ -108,6 +108,26 @@ resource "aws_route_table_association" "subnet2_route" {
   route_table_id = aws_route_table.route_table.id
 }
 
+resource "aws_security_group" "security_group" {
+  name = "ecs-security-group"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port = 0
+    protocol = -1
+    to_port = 0
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "any"
+  }
+  egress {
+    from_port = 0
+    protocol = -1
+    to_port = 0
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "any"
+  }
+}
+
 resource "aws_ecs_cluster" "this" {
   name = "app-cluster-challenge"
 }
