@@ -66,7 +66,7 @@ resource "aws_ecs_task_definition" "this" {
     [
       {
         "name": "app",
-        "imageUri": "${aws_ecr_repository.example.repository_url}:0.0.1-SNAPSHOT",
+        "imageUri": "public.ecr.aws/f9n5f1l7/dgs:latest",
         "portMappings": [
           {
             "containerPort": 8080,
