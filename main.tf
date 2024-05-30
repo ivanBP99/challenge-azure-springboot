@@ -137,13 +137,14 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   network_mode = "awsvpc"
   cpu          = "256"
   memory       = "512"
+  execution_role_arn = "arn:aws:iam::211125585534:role/ecsTaskExecutionRole"
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "ARM64"
   }
   container_definitions = jsonencode([
       {
-        name: "app",
+        name: "container-app",
         image: "public.ecr.aws/f9n5f1l7/dgs:latest",
         portMappings: [
           {
@@ -157,7 +158,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   requires_compatibilities = ["FARGATE"]
 }
 
-resource "aws_ecs_service" "this" {
+resource "aws_ecs_service" "ecs_service" {
   name            = "ecs-service"
   cluster         = aws_ecs_cluster.this.id
   task_definition  = aws_ecs_task_definition.ecs_task_definition.arn
