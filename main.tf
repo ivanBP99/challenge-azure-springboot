@@ -35,7 +35,7 @@ variable "image_tag" {
 
 provider "aws" {
   region = var.location
-  features {}
+  #features {}
 }
 
 #############################################################################
