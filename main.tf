@@ -139,7 +139,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group1"
+  name        = "lb-target-group2"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
