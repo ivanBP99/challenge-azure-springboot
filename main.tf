@@ -132,21 +132,8 @@ resource "aws_ecs_cluster" "this" {
   name = "app-cluster-challenge"
 }
 
-resource "aws_ecs_task_definition" "this" {
-  family = "app-task"
-  container_definitions = jsonencode([
-      {
-        "name": "app",
-        "imageUri": "public.ecr.aws/f9n5f1l7/dgs:latest",
-        "portMappings": [
-          {
-            "containerPort": 8080,
-            "hostPort": 8080
-          }
-        ]
-      }
-    ])
-  requires_compatibilities = ["FARGATE"]
+resource "aws_ecs_task_definition" "ecs_task_definition" {
+  family       = "app-task"
   network_mode = "awsvpc"
   cpu          = "256"
   memory       = "512"
@@ -154,21 +141,36 @@ resource "aws_ecs_task_definition" "this" {
     operating_system_family = "LINUX"
     cpu_architecture        = "ARM64"
   }
+  container_definitions = jsonencode([
+      {
+        name: "app",
+        image: "public.ecr.aws/f9n5f1l7/dgs:latest",
+        portMappings: [
+          {
+            containerPort: 8080,
+            hostPort: 8080,
+            protocol: "tcp"
+          }
+        ]
+      }
+    ])
+  requires_compatibilities = ["FARGATE"]
 }
 
-resource "aws_ecr_repository" "example" {
+resource "aws_ecr_repository" "ecr_repository" {
   name = "hansel"
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "app-challenge-service"
+  name            = "ecs-service"
   cluster         = aws_ecs_cluster.this.id
-  task_definition  = aws_ecs_task_definition.this.arn
+  task_definition  = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [ "subnet-123456", "subnet-789012" ]
-    assign_public_ip = true
+    subnets          = [ aws_subnet.subnet.id, aws_subnet.subnet2.id ]
+    security_groups = [aws_security_group.security_group.id]
+    //assign_public_ip = true
   }
 }
