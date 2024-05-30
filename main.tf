@@ -45,19 +45,6 @@ provider "aws" {
 }
 
 #############################################################################
-# DATA
-#############################################################################
-
-#data "aws_ecr_repository" "this" {
-#  name = var.ecr_repository
-#}
-
-#data "aws_ecr_image" "this" {
-#  repository_name  = data.aws_ecr_repository.this.name
-#  image_id         = data.aws_ecr_image_version.this.image_id
-#}
-
-#############################################################################
 # RESOURCES
 #############################################################################
 
