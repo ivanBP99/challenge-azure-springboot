@@ -121,10 +121,10 @@ resource "aws_lb" "ecs_alb" {
   name               = "ecs-alb"
   internal           = false
   load_balancer_type = "application"
-  security_group     = [aws_security_group.lb_sg.id]
+  security_groups    = [aws_security_group.lb_sg.id]
   subnets            = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
   tags               = {
-    environment = "alb-dev"
+    Environment = "dev"
   }
 }
 
