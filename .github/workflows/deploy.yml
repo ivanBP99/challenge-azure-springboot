@@ -21,7 +21,6 @@ jobs:
       id: extract-version
       run: |
         mvn -B package --file app/pom.xml
-        $project_version = mvn help:evaluate -Dexpression=project.version -q -DforceStdout; echo "project_version=$project_version" >> $Env:GITHUB_ENV
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -36,8 +35,17 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: hansel
-        IMAGE_TAG: ${{ env.project_version }}
+        IMAGE_TAG: 0.0.1-SNAPSHOT
       run: |
         cd ./app
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    - name: Setup Terrraform
+      uses: hashicorp/setup-terraform@v2
+    - name: Terraform Init
+      id: init
+      run: |
+        terraform fmt
+        terraform init -upgrade
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
