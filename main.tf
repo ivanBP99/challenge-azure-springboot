@@ -35,6 +35,7 @@ variable "vpc_cidr" {
   type = string
   default = "10.0.0.0/16"
 }
+
 #############################################################################
 # PROVIDERS
 #############################################################################
@@ -152,17 +153,21 @@ resource "aws_lb_target_group" "ecs_tg" {
 
 //cluster
 
-resource "aws_ecs_cluster" "cluster" {
-  name = "app-cluster-challenge"
+resource "aws_ecs_cluster" "cluster_challenge" {
+  name = "cluster-challenge"
+}
+
+resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
+  cluster_name = aws_ecs_cluster.cluster_challenge.name
+
   capacity_providers = ["FARGATE"]
 
   default_capacity_provider_strategy {
+    base              = 1
+    weight            = 100
     capacity_provider = "FARGATE"
-    weight            = "100"
   }
 }
-
-
 
 //auto-scaling
 
@@ -212,7 +217,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
 resource "aws_ecs_service" "ecs_service" {
   name            = "ecs-service"
-  cluster         = aws_ecs_cluster.cluster.id
+  cluster         = aws_ecs_cluster.cluster_challenge.id
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
