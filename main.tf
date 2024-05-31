@@ -177,7 +177,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 
 resource "aws_launch_template" "ecs_lt" {
   name                   = "ecs-template-lt1"
-  image_id               = "ami-0dba2cb6798deb6d8"
+  image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
 
