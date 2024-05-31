@@ -160,12 +160,12 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
   cluster_name       = aws_ecs_cluster.cluster_challenge.name
 
-  capacity_providers = ["FARGATE"]
+  capacity_providers = ["FARGATE_SPOT", "FARGATE"]
 
   default_capacity_provider_strategy {
     base              = 1
     weight            = 100
-    capacity_provider = "FARGATE"
+    capacity_provider = "FARGATE_SPOT"
   }
 }
 
@@ -190,24 +190,26 @@ resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
 #}
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family       = "app-task"
-  network_mode = "awsvpc"
-  cpu          = "256"
-  memory       = "512"
+  family             = "app-task"
+  network_mode       = "awsvpc"
+  cpu                = "1 vCPU"
+  memory             = "3 GB"
   execution_role_arn = "arn:aws:iam::211125585534:role/ecsTaskExecutionRole"
   runtime_platform {
     operating_system_family = "LINUX"
-    cpu_architecture        = "ARM64"
+    cpu_architecture        = "X86_64"
   }
   container_definitions = jsonencode([
       {
-        name: "container-app",
-        image: "public.ecr.aws/f9n5f1l7/dgs:latest",
+        name   = "container-app"
+        image  = "public.ecr.aws/f9n5f1l7/dgs:latest"
+        cpu    = 256
+        memory = 512
         portMappings: [
           {
-            containerPort: 80,
-            hostPort: 80,
-            protocol: "tcp"
+            containerPort = 80
+            hostPort      = 80
+            protocol      = "tcp"
           }
         ]
       }
@@ -233,12 +235,7 @@ resource "aws_ecs_service" "ecs_service" {
     security_groups = [aws_security_group.lb_sg.id]
     //assign_public_ip = true
   }
-
- # capacity_provider_strategy {
- #   base              = 0
- #   capacity_provider = "FARGATE"
- #   weight            = 100
- # }
+  
 }
 
 #############################################################################
