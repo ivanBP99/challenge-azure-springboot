@@ -123,7 +123,7 @@ resource "aws_security_group" "lb_sg" {
 //abl
 
 resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb"
+#  name               = "ecs-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
@@ -144,7 +144,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group"
+#  name        = "lb-target-group"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -240,7 +240,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 // provider
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-  name = "cp-ec2-10"
+  name = "cp-ec2-100"
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
 
