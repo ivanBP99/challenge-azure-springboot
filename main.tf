@@ -123,7 +123,7 @@ resource "aws_security_group" "lb_sg" {
 //abl
 
 resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb3"
+  name               = "ecs-alb4"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
@@ -144,7 +144,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group3"
+  name        = "lb-target-group4"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -158,7 +158,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge6"
+  name = "cluster-challenge7"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +176,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt4"
+  name                   = "ecs-template-lt5"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -209,7 +209,7 @@ resource "aws_launch_template" "ecs_lt" {
 //auto-scaling
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name                      = "challenge-sc-group2"
+  name                      = "challenge-sc-group3"
   vpc_zone_identifier       = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
   desired_capacity          = 2
   max_size                  = 3
@@ -233,7 +233,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 // provider
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-  name = "cp-ec2-1"
+  name = "cp-ec2-2"
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
 
@@ -259,7 +259,7 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family             = "app-task"
+  family             = "app-task1"
   network_mode       = "awsvpc"
   cpu                = "1 vCPU"
   memory             = "3 GB"
@@ -287,7 +287,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  name            = "ecs-service"
+  name            = "ecs-service1"
   cluster         = aws_ecs_cluster.cluster_challenge.id
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 2
