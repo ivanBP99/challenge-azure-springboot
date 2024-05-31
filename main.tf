@@ -139,7 +139,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group2"
+  name        = "lb-target-group1"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -152,9 +152,17 @@ resource "aws_lb_target_group" "ecs_tg" {
 
 //cluster
 
-resource "aws_ecs_cluster" "this" {
+resource "aws_ecs_cluster" "cluster" {
   name = "app-cluster-challenge"
+  capacity_providers = ["FARGATE"]
+
+  default_capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    weight            = "100"
+  }
 }
+
+
 
 //auto-scaling
 
@@ -204,7 +212,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
 resource "aws_ecs_service" "ecs_service" {
   name            = "ecs-service"
-  cluster         = aws_ecs_cluster.this.id
+  cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -219,6 +227,11 @@ resource "aws_ecs_service" "ecs_service" {
     subnets         = [ aws_subnet.subnet.id, aws_subnet.subnet2.id ]
     security_groups = [aws_security_group.lb_sg.id]
     //assign_public_ip = true
+  }
+  capacity_provider_strategy {
+    base              = 0
+    capacity_provider = "FARGATE"
+    weight            = 100
   }
 }
 
