@@ -240,7 +240,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 // provider
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-  name = "cp-ec2-9"
+  name = "cp-ec2-10"
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
 
@@ -266,7 +266,7 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family             = "task1"
+  family             = "task100"
   network_mode       = "awsvpc"
   cpu                = "1 vCPU"
   memory             = "3 GB"
@@ -279,7 +279,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   }
   container_definitions = jsonencode([
       {
-        name   = "task1"
+        name   = "task100"
         image  = "211125585534.dkr.ecr.us-east-2.amazonaws.com/hansel:0.0.1-SNAPSHOT"
         cpu    = 256
         memory = 512
