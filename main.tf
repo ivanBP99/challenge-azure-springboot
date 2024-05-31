@@ -5,7 +5,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 4.0.0"
     }
   }
@@ -16,24 +16,24 @@ terraform {
 #############################################################################
 
 variable "location" {
-  type = string
+  type    = string
   default = "us-east-2"
 }
 
 variable "ecr_repository" {
-  type = string
+  type    = string
   default = "hansel"
 }
 
 variable "image_tag" {
-  type = string
+  type    = string
   default = "0.0.1-SNAPSHOT"
 }
 
 variable "vpc_cidr" {
   description = "CIDR block for main"
-  type = string
-  default = "10.0.0.0/16"
+  type        = string
+  default     = "10.0.0.0/16"
 }
 
 #############################################################################
@@ -50,7 +50,7 @@ provider "aws" {
 #############################################################################
 
 resource "aws_vpc" "main" {
-  cidr_block = var.vpc_cidr
+  cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   tags = {
     name = "main"
@@ -58,22 +58,22 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "subnet" {
-  vpc_id = aws_vpc.main.id
-  cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, 1)
   map_public_ip_on_launch = true
-  availability_zone = "us-east-2a"
+  availability_zone       = "us-east-2a"
 }
 
 resource "aws_subnet" "subnet2" {
-  vpc_id = aws_vpc.main.id
-  cidr_block = cidrsubnet(aws_vpc.main.cidr_block, 8, 2)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, 2)
   map_public_ip_on_launch = true
-  availability_zone = "us-east-2b"
+  availability_zone       = "us-east-2b"
 }
 
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.main.id
-  tags = {
+  tags   = {
     name = "internet_gateway"
   }
 }
@@ -87,17 +87,17 @@ resource "aws_route_table" "route_table" {
 }
 
 resource "aws_route_table_association" "subnet_route" {
-  subnet_id = aws_subnet.subnet.id
+  subnet_id      = aws_subnet.subnet.id
   route_table_id = aws_route_table.route_table.id
 }
 
 resource "aws_route_table_association" "subnet2_route" {
-  subnet_id = aws_subnet.subnet2.id
+  subnet_id      = aws_subnet.subnet2.id
   route_table_id = aws_route_table.route_table.id
 }
 
 resource "aws_security_group" "lb_sg" {
-  name = "ecs-security-group"
+  name   = "ecs-security-group"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -140,7 +140,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group1"
+  name        = "lb-target-group3"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -158,7 +158,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 }
 
 resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
-  cluster_name = aws_ecs_cluster.cluster_challenge.name
+  cluster_name       = aws_ecs_cluster.cluster_challenge.name
 
   capacity_providers = ["FARGATE"]
 
@@ -233,7 +233,7 @@ resource "aws_ecs_service" "ecs_service" {
     security_groups = [aws_security_group.lb_sg.id]
     //assign_public_ip = true
   }
-  
+
  # capacity_provider_strategy {
  #   base              = 0
  #   capacity_provider = "FARGATE"
