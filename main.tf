@@ -271,7 +271,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   container_definitions = jsonencode([
       {
         name   = "container-app"
-        image  = "public.ecr.aws/f9n5f1l7/dgs:latest"
+        image  = "211125585534.dkr.ecr.us-east-2.amazonaws.com/hansel:0.0.1-SNAPSHOT"
         cpu    = 256
         memory = 512
         portMappings: [
