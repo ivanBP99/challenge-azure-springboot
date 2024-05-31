@@ -216,7 +216,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   protect_from_scale_in     = false
 
   launch_template {
-    id      = aws_launch
+    id      = aws_launch_template.ecs_lt.id
     version = "$Latest"
   }
 
