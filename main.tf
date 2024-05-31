@@ -123,7 +123,7 @@ resource "aws_security_group" "lb_sg" {
 //abl
 
 resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb8"
+  name               = "ecs-alb1"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
@@ -144,7 +144,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group8"
+  name        = "lb-target-group1"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -158,7 +158,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge3"
+  name = "cluster-challenge4"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +176,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt6"
+  name                   = "ecs-template-lt2"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -299,9 +299,9 @@ resource "aws_ecs_service" "ecs_service" {
   }
   force_new_deployment = true
 
-  triggers = {
-    redeployment = plantimestamp()
-  }
+#   triggers = {
+#  redeployment = plantimestamp()
+#  }
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider.name
