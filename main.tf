@@ -123,7 +123,7 @@ resource "aws_security_group" "lb_sg" {
 //abl
 
 resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb4"
+  name               = "ecs-alb5"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
@@ -144,7 +144,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group4"
+  name        = "lb-target-group5"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -176,13 +176,14 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt2"
+  name                   = "ecs-template-lt3"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
 
   iam_instance_profile {
-    name = "test"
+    name = "ecsInstanceRole"
+    # name = "testChallenge"
   }
   monitoring {
     enabled = true
