@@ -158,7 +158,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge"
+  name = "cluster-challenge2"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +176,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt"
+  name                   = "ecs-template-lt2"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -279,7 +279,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   }
   container_definitions = jsonencode([
       {
-        name   = "task100"
+        name   = "dockergs"
         image  = "211125585534.dkr.ecr.us-east-2.amazonaws.com/hansel:0.0.1-SNAPSHOT"
         cpu    = 256
         memory = 512
@@ -318,7 +318,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
-    container_name   = "ecs_service"
+    container_name   = "dockergs"
     container_port   = 80
   }
 
