@@ -101,7 +101,7 @@ resource "aws_route_table_association" "subnet2_route" {
 //sg
 
 resource "aws_security_group" "lb_sg" {
-  name   = "ecs-security-group"
+  name   = "ecs-security-group1"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -123,7 +123,7 @@ resource "aws_security_group" "lb_sg" {
 //abl
 
 resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb5"
+  name               = "ecs-alb6"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
@@ -144,7 +144,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group5"
+  name        = "lb-target-group6"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -158,7 +158,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge8"
+  name = "cluster-challenge9"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +176,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt6"
+  name                   = "ecs-template-lt7"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -199,6 +199,13 @@ resource "aws_launch_template" "ecs_lt" {
     }
   }
 
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "myasg"
+    }
+  }
+
   user_data = base64encode(<<-EOF
       #!/bin/bash
       echo ECS_CLUSTER=${aws_ecs_cluster.cluster_challenge.name} >> /etc/ecs/ecs.config;
@@ -209,7 +216,7 @@ resource "aws_launch_template" "ecs_lt" {
 //auto-scaling
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name                      = "challenge-sc-group4"
+  name                      = "challenge-sc-group5"
   vpc_zone_identifier       = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
   desired_capacity          = 2
   max_size                  = 3
@@ -233,7 +240,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 // provider
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-  name = "cp-ec2-3"
+  name = "cp-ec2-4"
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
 
@@ -259,18 +266,20 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family             = "app-task2"
+  family             = "task1"
   network_mode       = "awsvpc"
   cpu                = "1 vCPU"
   memory             = "3 GB"
   execution_role_arn = "arn:aws:iam::211125585534:role/ecsTaskExecutionRole"
+  task_role_arn      = "arn:aws:iam::211125585534:role/ecsTaskExecutionRole"
+  requires_compatibilities = ["EC2"]
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
   }
   container_definitions = jsonencode([
       {
-        name   = "container-app"
+        name   = "task1"
         image  = "211125585534.dkr.ecr.us-east-2.amazonaws.com/hansel:0.0.1-SNAPSHOT"
         cpu    = 256
         memory = 512
@@ -283,11 +292,10 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
         ]
       }
     ])
-#  requires_compatibilities = ["FARGATE"]
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  name            = "ecs-service2"
+  name            = "ecs-service3"
   cluster         = aws_ecs_cluster.cluster_challenge.id
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 2
@@ -310,7 +318,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
-    container_name   = "container-app"
+    container_name   = "ecs_service"
     container_port   = 80
   }
 
@@ -328,6 +336,6 @@ resource "aws_ecs_service" "ecs_service" {
 # OUTPUT
 #############################################################################
 
-#output "" {
-#  value = ""
-#}
+output "autoscaling_group_id" {
+  value = aws_autoscaling_group.autoscaling_group.id
+}
