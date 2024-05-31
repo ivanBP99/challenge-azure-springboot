@@ -101,7 +101,7 @@ resource "aws_route_table_association" "subnet2_route" {
 //sg
 
 resource "aws_security_group" "lb_sg" {
-  name   = "ecs-security-group3"
+  name   = "ecs-security-group"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -123,7 +123,7 @@ resource "aws_security_group" "lb_sg" {
 //abl
 
 resource "aws_lb" "ecs_alb" {
-  name               = "ecs-alb8"
+  name               = "ecs-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
@@ -144,7 +144,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 resource "aws_lb_target_group" "ecs_tg" {
-  name        = "lb-target-group7"
+  name        = "lb-target-group"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -158,7 +158,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge10"
+  name = "cluster-challenge"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +176,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt9"
+  name                   = "ecs-template-lt"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -216,7 +216,7 @@ resource "aws_launch_template" "ecs_lt" {
 //auto-scaling
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name                      = "challenge-sc-group7"
+  name                      = "challenge-sc-group"
   vpc_zone_identifier       = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
   desired_capacity          = 2
   max_size                  = 3
