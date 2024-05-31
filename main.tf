@@ -233,11 +233,12 @@ resource "aws_ecs_service" "ecs_service" {
     security_groups = [aws_security_group.lb_sg.id]
     //assign_public_ip = true
   }
-  capacity_provider_strategy {
-    base              = 0
-    capacity_provider = "FARGATE"
-    weight            = 100
-  }
+  
+ # capacity_provider_strategy {
+ #   base              = 0
+ #   capacity_provider = "FARGATE"
+ #   weight            = 100
+ # }
 }
 
 #############################################################################
