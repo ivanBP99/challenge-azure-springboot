@@ -78,6 +78,8 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
+//route
+
 resource "aws_route_table" "route_table" {
   vpc_id = aws_vpc.main.id
   route {
@@ -95,6 +97,8 @@ resource "aws_route_table_association" "subnet2_route" {
   subnet_id      = aws_subnet.subnet2.id
   route_table_id = aws_route_table.route_table.id
 }
+
+//sg
 
 resource "aws_security_group" "lb_sg" {
   name   = "ecs-security-group"
@@ -157,37 +161,99 @@ resource "aws_ecs_cluster" "cluster_challenge" {
   name = "cluster-challenge"
 }
 
-resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
-  cluster_name       = aws_ecs_cluster.cluster_challenge.name
+#resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
+#  cluster_name       = aws_ecs_cluster.cluster_challenge.name
 
-  capacity_providers = ["FARGATE_SPOT", "FARGATE"]
+#  capacity_providers = ["FARGATE_SPOT", "FARGATE"]
 
-  default_capacity_provider_strategy {
-    base              = 1
-    weight            = 100
-    capacity_provider = "FARGATE_SPOT"
+#  default_capacity_provider_strategy {
+#    base              = 1
+#    weight            = 100
+#    capacity_provider = "FARGATE_SPOT"
+#  }
+#}
+
+//template
+
+resource "aws_launch_template" "ecs_lt" {
+  name                   = "ecs-template"
+  image_id               = "ami-062c116e449466e7f"
+  instance_type          = "t3.micro"
+  vpc_security_group_ids = [aws_security_group.lb_sg.id]
+
+  iam_instance_profile {
+    name = "test"
   }
+  monitoring {
+    enabled = true
+  }
+
+  block_device_mappings {
+    device_name = "/dev/sdf"
+
+    ebs {
+      volume_size = 20
+    }
+  }
+
+  user_data = base64encode(<<-EOF
+      #!/bin/bash
+      echo ECS_CLUSTER=${aws_ecs_cluster.cluster_challenge.name} >> /etc/ecs/ecs.config;
+    EOF
+  )
 }
 
 //auto-scaling
 
-#resource "aws_autoscaling_group" "autoscaling_group" {
-#  vpc_zone_identifier = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
-#  desired_capacity = 2
-#  max_size = 3
-#  min_size = 1
+resource "aws_autoscaling_group" "autoscaling_group" {
+  name                      = "challenge-sc-group"
+  vpc_zone_identifier       = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
+  desired_capacity          = 2
+  max_size                  = 3
+  min_size                  = 1
+  health_check_grace_period = 0
+  health_check_type         = "EC2"
+  protect_from_scale_in     = false
 
-#  launch_template {
-#    id = aws_launch
-#  }
-#}
+  launch_template {
+    id      = aws_launch
+    version = "$Latest"
+  }
 
-#resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-#  name = "test1"
-#  auto_scaling_group_provider {
-#    auto_scaling_group_arn = ""
-#  }
-#}
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = true
+    propagate_at_launch = true
+  }
+}
+
+// provider
+
+resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
+  name = "cp-ec2"
+  auto_scaling_group_provider {
+    auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
+
+    managed_scaling {
+      maximum_scaling_step_size = 2
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 100
+    }
+  }
+}
+
+resource "aws_ecs_cluster_capacity_providers" "this" {
+  cluster_name       = aws_ecs_cluster.cluster_challenge.name
+  capacity_providers = [aws_ecs_capacity_provider.ecs_capacity_provider.name]
+
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider.name
+    base              = 1
+    weight            = 100
+  }
+
+}
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   family             = "app-task"
@@ -214,7 +280,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
         ]
       }
     ])
-  requires_compatibilities = ["FARGATE"]
+#  requires_compatibilities = ["FARGATE"]
 }
 
 resource "aws_ecs_service" "ecs_service" {
@@ -222,7 +288,12 @@ resource "aws_ecs_service" "ecs_service" {
   cluster         = aws_ecs_cluster.cluster_challenge.id
   task_definition = aws_ecs_task_definition.ecs_task_definition.arn
   desired_count   = 1
-  launch_type     = "FARGATE"
+#  launch_type     = "FARGATE"
+
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider.name
+    weight            = 100
+  }
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
@@ -235,7 +306,9 @@ resource "aws_ecs_service" "ecs_service" {
     security_groups = [aws_security_group.lb_sg.id]
     //assign_public_ip = true
   }
-  
+
+  depends_on = [aws_autoscaling_group.autoscaling_group]
+
 }
 
 #############################################################################
