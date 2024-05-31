@@ -158,7 +158,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge2"
+  name = "cluster-challenge3"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +176,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt2"
+  name                   = "ecs-template-lt3"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -216,7 +216,7 @@ resource "aws_launch_template" "ecs_lt" {
 //auto-scaling
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name                      = "challenge-sc-group"
+#  name                      = "challenge-sc-group"
   vpc_zone_identifier       = [aws_subnet.subnet.id, aws_subnet.subnet2.id]
   desired_capacity          = 2
   max_size                  = 3
