@@ -4,5 +4,5 @@
 
 
 
-![Observability Architecture](./images/TERRAECS.DRAWIO.png)
+![Elastic_Container Service](./images/TERRAECS.drawio.png)
 
