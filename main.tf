@@ -227,7 +227,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   desired_capacity          = 2
   max_size                  = 3
   min_size                  = 1
-  health_check_grace_period = 0
+  health_check_grace_period = 1
   health_check_type         = "EC2"
   protect_from_scale_in     = false
 
