@@ -4,6 +4,10 @@
 
 terraform {
   required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~>2.20.0"
+    }
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.0.0"
@@ -39,6 +43,8 @@ variable "vpc_cidr" {
 #############################################################################
 # PROVIDERS
 #############################################################################
+
+provider "docker" {}
 
 provider "aws" {
   region = var.location
@@ -101,7 +107,7 @@ resource "aws_route_table_association" "subnet2_route" {
 //sg
 
 resource "aws_security_group" "lb_sg" {
-  name   = "ecs-security-group"
+#  name   = "ecs-security-group"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -158,7 +164,7 @@ resource "aws_lb_target_group" "ecs_tg" {
 //cluster
 
 resource "aws_ecs_cluster" "cluster_challenge" {
-  name = "cluster-challenge3"
+  name = "cluster-dev"
 }
 
 #resource "aws_ecs_cluster_capacity_providers" "cluster_provider" {
@@ -176,7 +182,7 @@ resource "aws_ecs_cluster" "cluster_challenge" {
 //template
 
 resource "aws_launch_template" "ecs_lt" {
-  name                   = "ecs-template-lt3"
+  name                   = "ecs-template-launch"
   image_id               = "ami-09040d770ffe2224f"
   instance_type          = "t3.micro"
   vpc_security_group_ids = [aws_security_group.lb_sg.id]
@@ -240,15 +246,15 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 // provider
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-  name = "cp-ec2-1000"
+  name = "cp-ecs-1"
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.autoscaling_group.arn
 
     managed_scaling {
-      maximum_scaling_step_size = 2
+      maximum_scaling_step_size = 100
       minimum_scaling_step_size = 1
       status                    = "ENABLED"
-      target_capacity           = 100
+      target_capacity           = 3
     }
   }
 }
@@ -266,7 +272,7 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 }
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family             = "task100"
+  family             = "task-01"
   network_mode       = "awsvpc"
   cpu                = "1 vCPU"
   memory             = "3 GB"
@@ -288,6 +294,13 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
             containerPort = 80
             hostPort      = 80
             protocol      = "tcp"
+            appProtocol   = "http"
+          },
+          {
+            containerPort = 8080
+            hostPort      = 8080
+            protocol      = "tcp"
+            appProtocol   = "http"
           }
         ]
       }
@@ -295,12 +308,17 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  name            = "ecs_service"
-  cluster         = aws_ecs_cluster.cluster_challenge.id
-  task_definition = aws_ecs_task_definition.ecs_task_definition.arn
-  desired_count   = 2
-#  launch_type     = "FARGATE"
+  name                = "ecs_service"
+  cluster             = aws_ecs_cluster.cluster_challenge.id
+  task_definition     = aws_ecs_task_definition.ecs_task_definition.arn
+  desired_count       = 2
+  scheduling_strategy = "REPLICA"
+  launch_type         = "FARGATE"
 
+
+  deployment_controller {
+    type = "EXTERNAL"
+  }
 
   placement_constraints {
     type = "distinctInstance"
@@ -316,11 +334,11 @@ resource "aws_ecs_service" "ecs_service" {
     weight            = 100
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
-    container_name   = "dockergs"
-    container_port   = 80
-  }
+#  load_balancer {
+#    target_group_arn = aws_lb_target_group.ecs_tg.arn
+#    container_name   = "dockergs"
+#    container_port   = 80
+#  }
 
   network_configuration {
     subnets         = [ aws_subnet.subnet.id, aws_subnet.subnet2.id ]
@@ -339,3 +357,4 @@ resource "aws_ecs_service" "ecs_service" {
 output "autoscaling_group_id" {
   value = aws_autoscaling_group.autoscaling_group.id
 }
+

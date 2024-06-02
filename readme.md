@@ -1,8 +1,8 @@
 # Terraform with ECS
 
-INFRA
+**DIAGRAMA DE INFRAESTRUCTURA**
 
 
 
-![Observability Architecture](./images/observability-arch.jpg)
+![Observability Architecture](./images/TERRAECS.DRAWIO.png)
 
